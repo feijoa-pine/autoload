@@ -20,7 +20,6 @@ class Autoload
 
     private static $instance;
     private $dirs     = [];       // クラス探索ディレクトリリスト
-    private $required = [];       // require済みクラスリスト
 
     public function __construct()
     {
@@ -37,11 +36,6 @@ class Autoload
     public function registerd(): array
     {
         return self::$instance->dirs;
-    }
-    
-    public function required(): array
-    {
-        return self::$instance->required;
     }
     
     /**
@@ -102,8 +96,6 @@ class Autoload
 
     public function autoLoad($classname)
     {
-        if(in_array($classname, $this->required))  { return; }
-
         // ネームスペースを考慮し、純粋なクラス名だけを抽出する
         $parts          = explode("\\", $classname);
         $targetclass    = array_pop($parts);
@@ -111,32 +103,12 @@ class Autoload
         foreach($this->dirs as $dir)
         {
             $filepath       = "{$dir}/{$targetclass}.php";
-            if(!is_readable($filepath)) { continue; }
-            if(!$this->check_namespace($filepath, implode("\\", $parts)))  { continue; }
-            
-            require_once    $filepath;
-            $this->required[] = $classname;
+            if(!is_readable($filepath))     { continue; }
+            require_once $filepath;
+            if(!class_exists($classname))   { continue; }
             return;
         }
         throw new ClassNotFoundException($classname);
-    }
-    
-    private function check_namespace(string $filepath, string $namespace): bool
-    {
-        if(false === ($file = fopen($filepath, "r")))   { return false; }
-        $matched    = false;
-        while($line = fgets($file))
-        {
-            if(preg_match("|^\s*class\s|ui", $line))       { break; }
-            if(!preg_match("|^\s*namespace\s|ui", $line))   { continue; }
-            
-            $fixed      = preg_replace("|\\\\|u", "\\\\\\\\", $namespace);
-            $pattern    = "|\s{$fixed};|u";
-            $matched    = (bool)preg_match($pattern, $line);
-            break;
-        }
-        fclose($file);
-        return $matched;
     }
     
 }

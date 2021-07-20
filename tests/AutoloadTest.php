@@ -70,17 +70,8 @@ class AutoloadTest extends TestCaseExtend
         $this->assertCount(3,       $registerd);
         //
         $this->assertEquals($dir,   $registerd[0]);
-        $this->assertEquals($dir . "/subfalder",   $registerd[1]);
-        $this->assertEquals($dir . "/subfalder/magofolder",   $registerd[2]);
-    }
-    
-    public function test_autoload()
-    {
-        $dir    = realpath(__DIR__ . "/folder");
-        Autoload::register($dir);
-        
-        $result = mikisan\core\util\Test::hello();
-        $this->assertEquals("Hello World.", $result);
+        $this->assertEquals($dir . "/subfolder",   $registerd[1]);
+        $this->assertEquals($dir . "/subfolder/magofolder",   $registerd[2]);
     }
     
     public function test_autoload_class_not_found()
@@ -92,9 +83,15 @@ class AutoloadTest extends TestCaseExtend
         Autoload::register($dir);
         
         $result = mikisan\core\another\Test::hello();
-        //
-        $required   = Autoload::required();
-        $this->assertTrue(in_array("mikisan\core\util\Test", $required, true));
+    }
+    
+    public function test_autoload()
+    {
+        $dir    = realpath(__DIR__ . "/folder");
+        Autoload::register($dir);
+        
+        $result = mikisan\core\util\Test::hello();
+        $this->assertEquals("Hello World.", $result);
     }
     
     public function test_autoload_register_multiple()
@@ -107,22 +104,6 @@ class AutoloadTest extends TestCaseExtend
         //
         $result = mikisan\core\util\Test::hello();
         $this->assertEquals("Hello World.", $result);
-    }
-    
-    public function test_required()
-    {
-        $dir    = realpath(__DIR__ . "/folder");
-        Autoload::register($dir, true);
-        //
-        $result = \mikisan\core\another\Test::hello();
-        $result = \mikisan\core\util\Test::hello();
-        //
-        $required   = Autoload::required();
-        //
-        $this->assertCount(2,       $required);
-        //
-        $this->assertTrue(in_array("mikisan\core\another\Test", $required, true));
-        $this->assertTrue(in_array("mikisan\core\util\Test", $required, true));
     }
     
 }
